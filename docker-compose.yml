@@ -1,0 +1,35 @@
+version: '3'
+services:
+  hyperf:
+    container_name: hyperf
+    image: hyperf/hyperf:8.1-alpine-v3.18-swoole
+    volumes:
+      - ./:/data/project/hyperf-skeleton
+    ports:
+      - "9501:9501"
+    working_dir: /data/project/hyperf-skeleton
+    command: tail -f /dev/null
+    privileged: true
+    user: root
+    networks:
+      - hyperf-network
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: expenses-mysql
+      DB_USERNAME: root
+      DB_PASSWORD: password
+
+  mysql:
+    image: mysql:5.7
+    container_name: expenses-mysql-1
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - hyperf-network
+
+networks:
+  hyperf-network:
