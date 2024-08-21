@@ -10,15 +10,21 @@ declare(strict_types=1);
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
+use App\Controller\AuthController;
 use App\Middleware\AuthMiddleware;
 use Hyperf\HttpServer\Router\Router;
 
 Router::addRoute(['GET', 'POST', 'HEAD'], '/', 'App\Controller\IndexController@index');
 
 Router::addGroup('/api', function () {
-    Router::post('/login', 'App\Controller\AuthController@login');
-    Router::post('/register', 'App\Controller\AuthController@register');
-    Router::get('/categorys/get', [\App\Controller\CategorysController::class, 'get'], ['middleware' => [AuthMiddleware::class]]);
+    Router::post('/login', [AuthController::class, 'login']);
+    Router::post('/register', [AuthController::class, 'register']);
+
+    // Router::get('', [UserController::class, 'index']);
+    // Router::get('/{id}', [UserController::class, 'show']);
+    // Router::post('', [UserController::class, 'store']);
+    // Router::delete('/{id}', [UserController::class, 'delete']);
+    // Router::get('/categorys/get', [\App\Controller\CategorysController::class, 'get'], ['middleware' => [AuthMiddleware::class]]);
 });
 
 Router::get('/favicon.ico', function () {

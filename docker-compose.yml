@@ -8,7 +8,7 @@ services:
     ports:
       - "9501:9501"
     working_dir: /data/project/hyperf-skeleton
-    command: tail -f /dev/null
+    command: php bin/hyperf.php start
     privileged: true
     user: root
     networks:

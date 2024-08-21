@@ -16,13 +16,11 @@ class CreateUsersTable extends Migration
             $table->uuid('uuid');
             $table->string('name', 60);
             $table->string('email', 60)->unique();
-            $table->date('birth_date');
-            $table->string('document', 20)->unique();
-            $table->string('cellphone', 20)->unique();
             $table->string('password');
             $table->string('type')->default('admin');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

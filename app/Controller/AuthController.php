@@ -6,9 +6,6 @@ namespace App\Controller;
 
 use App\Request\UserRegisterRequest;
 use App\Request\LoginRequest;
-use Hyperf\HttpServer\Annotation\Controller;
-use Hyperf\HttpServer\Annotation\RequestMapping;
-use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use App\Interfaces\LoginRepositoryInterface;
 
