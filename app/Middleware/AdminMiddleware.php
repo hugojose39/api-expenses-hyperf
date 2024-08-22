@@ -7,10 +7,9 @@ use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Di\Container;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-
 use function Hyperf\Support\env;
 
-class AuthMiddleware
+class AdminMiddleware
 {
     protected $jwtSecretKey;
 
@@ -32,6 +31,11 @@ class AuthMiddleware
         
         try {
             $decoded = JWT::decode($token[0], new Key($this->jwtSecretKey, 'HS256'));
+
+            if (empty($decoded->scope) || $decoded->scope !== 'admin') {
+                return $this->response->json(['error' => 'Acesso negado: privilégios de administrador são necessários'], 403);
+            }
+
             $this->container->set('user', $decoded);
         } catch (\Exception $e) {
             return $this->response->json(['error' => 'Token de autenticação inválido'], 401);
@@ -39,5 +43,4 @@ class AuthMiddleware
         
         return $handler->handle($request);
     }
-    
 }

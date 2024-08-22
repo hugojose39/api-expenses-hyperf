@@ -11,10 +11,7 @@ use App\Interfaces\LoginRepositoryInterface;
 
 class AuthController
 {
-    private $loginRepository;
-    private $response;
-
-    public function __construct(LoginRepositoryInterface $loginRepository, ResponseInterface $response)
+    public function __construct(private LoginRepositoryInterface $loginRepository, private ResponseInterface $response)
     {
         $this->loginRepository = $loginRepository;
         $this->response = $response;
@@ -37,7 +34,7 @@ class AuthController
             return $this->response->json([
                 'error' => 'Não foi possível realizar o cadastro.'
             ])->withStatus(500);
-        } 
+        }
     }
 
 }
