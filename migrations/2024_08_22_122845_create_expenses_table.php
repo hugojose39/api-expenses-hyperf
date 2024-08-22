@@ -10,7 +10,8 @@ class CreateExpensesTable extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('card_id')->constrained('cards')->onDelete('cascade');
+            $table->unsignedBigInteger('card_id');
+            $table->foreign('card_id')->references('id')->on('cards')->onDelete('cascade');
             $table->decimal('amount', 15, 2);
             $table->string('description')->nullable();
             $table->timestamps();

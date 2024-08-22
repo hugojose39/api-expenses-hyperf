@@ -26,7 +26,8 @@ Router::addGroup('/api', function () {
     Router::post('/register', [AuthController::class, 'register']);
 
     Router::addGroup('/users', function () {
-        Router::get('', [UserController::class, 'index'], ['middleware' => [AdminMiddleware::class]]);
+        Router::get('/indexAll', [UserController::class, 'indexAll'], ['middleware' => [AdminMiddleware::class]]);
+        Router::get('', [UserController::class, 'index'], ['middleware' => [AuthMiddleware::class]]);
         Router::get('/{id}', [UserController::class, 'show'], ['middleware' => [AuthMiddleware::class]]);
         Router::post('', [UserController::class, 'store'], ['middleware' => [AuthMiddleware::class]]);
         Router::put('/{id}', [UserController::class, 'update'], ['middleware' => [AuthMiddleware::class]]);
@@ -34,7 +35,8 @@ Router::addGroup('/api', function () {
     });
 
     Router::addGroup('/cards', function () {
-        Router::get('', [CardController::class, 'index'], ['middleware' => [AdminMiddleware::class]]);
+        Router::get('/indexAll', [CardController::class, 'indexAll'], ['middleware' => [AdminMiddleware::class]]);
+        Router::get('', [CardController::class, 'index'], ['middleware' => [AuthMiddleware::class]]);
         Router::get('/{id}', [CardController::class, 'show'], ['middleware' => [AuthMiddleware::class]]);
         Router::post('', [CardController::class, 'store'], ['middleware' => [AuthMiddleware::class]]);
         Router::put('/{id}', [CardController::class, 'update'], ['middleware' => [AuthMiddleware::class]]);
@@ -42,7 +44,8 @@ Router::addGroup('/api', function () {
     });
 
     Router::addGroup('/expenses', function () {
-        Router::get('', [ExpenseController::class, 'index'], ['middleware' => [AdminMiddleware::class]]);
+        Router::get('/indexAll', [ExpenseController::class, 'indexAll'], ['middleware' => [AdminMiddleware::class]]);
+        Router::get('', [ExpenseController::class, 'index'], ['middleware' => [AuthMiddleware::class]]);
         Router::get('/{id}', [ExpenseController::class, 'show'], ['middleware' => [AuthMiddleware::class]]);
         Router::post('', [ExpenseController::class, 'store'], ['middleware' => [AuthMiddleware::class]]);
         Router::put('/{id}', [ExpenseController::class, 'update'], ['middleware' => [AuthMiddleware::class]]);

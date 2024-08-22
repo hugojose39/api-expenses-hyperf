@@ -7,7 +7,6 @@ use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Di\Container;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-
 use function Hyperf\Support\env;
 
 class AuthMiddleware
@@ -16,10 +15,7 @@ class AuthMiddleware
 
     public function __construct(protected RequestInterface $request, protected ResponseInterface $response, protected Container $container)
     {
-        $this->request = $request;
-        $this->response = $response;
         $this->jwtSecretKey = env('JWT_SECRET_KEY');
-        $this->container = $container;
     }
 
     public function process($request, $handler)

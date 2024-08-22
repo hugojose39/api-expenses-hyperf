@@ -14,6 +14,7 @@ class Card extends Model
     protected ?string $table = 'cards';
 
     protected array $fillable = [
+        'id',
         'user_id',
         'number',
         'balance',

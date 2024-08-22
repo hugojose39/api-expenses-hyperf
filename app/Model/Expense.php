@@ -13,6 +13,7 @@ class Expense extends Model
     protected ?string $table = 'expenses';
 
     protected array $fillable = [
+        'id',
         'card_id',
         'amount',
         'description',

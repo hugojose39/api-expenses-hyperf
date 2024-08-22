@@ -8,6 +8,11 @@ use Hyperf\Validation\Request\FormRequest;
 
 class ExpenseRequest extends FormRequest
 {
+    public function authorize()
+    {
+        return true;
+    }
+
     public function rules(): array
     {
         return [

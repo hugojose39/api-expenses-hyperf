@@ -4,51 +4,96 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Event\ExpenseCreated;
 use App\Model\Card;
 use App\Model\Expense;
+use App\Model\User;
 use App\Request\ExpenseRequest;
-use Hyperf\DbConnection\Db;
+use Hyperf\Coroutine\Parallel;
 use Psr\Http\Message\ResponseInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 
 class ExpenseController extends AbstractController
 {
+    public function __construct(
+        private readonly Card                     $card,
+        private readonly Expense                  $expense,
+        private readonly User                     $user,
+        private readonly EventDispatcherInterface $eventDispatcher
+    )
+    {
+    }
+
     public function store(ExpenseRequest $request): ResponseInterface
     {
-        $user = $this->container->get('user'); // Obtém o usuário autenticado
+        $user = $this->getAuthenticatedUser();
 
-        $card = Card::findOrFail($request->card_id);
+        $input = $request->validated();
 
-        if (!$card->hasSufficientBalance($request->amount)) {
+        $card = $this->card->findOrFail($input['card_id']);
+
+        if (!$card->hasSufficientBalance($input['amount'])) {
             return $this->response->json(['message' => 'Saldo insuficiente'], 422);
         }
 
-        Db::transaction(function () use ($card, $request, $user) {
-            $card->balance -= $request->amount;
+        $parallel = new Parallel();
+
+        $parallel->add(
+            function () use ($input) {
+                $this->expense->create($input);
+            },
+            $user['id']
+        );
+
+        if (!empty($parallel->wait())) {
+            $card->balance -= $input['amount'];
             $card->save();
 
-            $expense = Expense::create(array_merge($request->validated(), ['user_id' => $user->id]));
-            
-            // Aqui dispararia o evento de envio de email para o usuário e administradores.
-        });
+            $users = $this->user->where(function ($query) use ($user) {
+                $query->where('id', $user->id)
+                    ->orWhere('type', 'admin');
+            })->get();
+
+            $this->eventDispatcher->dispatch(new ExpenseCreated($users));
+        }
 
         return $this->response->json(['message' => 'Despesa criada com sucesso']);
     }
 
+    public function indexAll(): ResponseInterface
+    {
+        $expenses = $this->expense->all();
+        return $this->response->json($expenses);
+    }
+
     public function index(): ResponseInterface
     {
-        $expenses = Expense::all();
+        $user = $this->getAuthenticatedUser();
+        $expenses = $this->expense->where('user_id', $user->id)->get();
         return $this->response->json($expenses);
     }
 
     public function show(int $id): ResponseInterface
     {
-        $expense = Expense::findOrFail($id);
+        $user = $this->getAuthenticatedUser();
+        $expense = $this->expense->where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$expense) {
+            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'], 403);
+        }
+
         return $this->response->json($expense);
     }
 
     public function delete(int $id): ResponseInterface
     {
-        $expense = Expense::findOrFail($id);
+        $user = $this->getAuthenticatedUser();
+        $expense = $this->expense->where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$expense) {
+            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'], 403);
+        }
+
         $expense->delete();
         return $this->response->json(['message' => 'Despesa apagada com sucesso']);
     }

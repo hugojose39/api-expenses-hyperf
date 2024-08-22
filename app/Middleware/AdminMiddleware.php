@@ -15,10 +15,7 @@ class AdminMiddleware
 
     public function __construct(protected RequestInterface $request, protected ResponseInterface $response, protected Container $container)
     {
-        $this->request = $request;
-        $this->response = $response;
         $this->jwtSecretKey = env('JWT_SECRET_KEY');
-        $this->container = $container;
     }
 
     public function process($request, $handler)

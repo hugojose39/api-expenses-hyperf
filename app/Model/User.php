@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Hyperf\Database\Model\Relations\HasMany;
 use Hyperf\DbConnection\Model\Model;
 use Hyperf\Database\Model\SoftDeletes;
 
@@ -12,6 +13,7 @@ class User extends Model
     protected ?string $table = 'users';
 
     protected array $fillable = [
+        'id',
         'uuid',
         'name',
         'email',
@@ -29,5 +31,10 @@ class User extends Model
     ];
 
     protected array $dates = ['deleted_at'];
+
+    public function cards(): HasMany
+    {
+        return $this->hasMany(Card::class);
+    }
 }
 
