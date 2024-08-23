@@ -1,63 +1,347 @@
-# Introduction
+# Documentação da API de despesas
 
-This is a skeleton application using the Hyperf framework. This application is meant to be used as a starting place for those looking to get their feet wet with Hyperf Framework.
+Esta API fornece uma maneira de gerenciar despesas. Ela usa a autenticação JWT para proteger as rotas.
 
-# Requirements
+Baixe o código-fonte em um arquivo zip, ou, se você tiver o Git instalado, use o comando git clone. Escolha a opção que melhor se adapta às suas necessidades - **HTTPS, SSH, GitHub CLI**. Abaixo estão as configurações para o ambiente de desenvolvimento.
 
-Hyperf has some requirements for the system environment, it can only run under Linux and Mac environment, but due to the development of Docker virtualization technology, Docker for Windows can also be used as the running environment under Windows.
+## Tecnologias usadas
+* PHP
+* Hyperf
+* MySQL
+* Composer
+* GIT
+* Docker
+* JWT
+* PHP Mailer
 
-The various versions of Dockerfile have been prepared for you in the [hyperf/hyperf-docker](https://github.com/hyperf/hyperf-docker) project, or directly based on the already built [hyperf/hyperf](https://hub.docker.com/r/hyperf/hyperf) Image to run.
+## Principais Arquivos
+* AdminMiddleware.php
+* AuthMiddleware.php
+* AbstractController.php
+* AuthController.php
+* CardController.php
+* ExpensesController.php
+* UsersController.php
+* LoginRepositoryInterface.php
+* Card.php
+* Expense.php
+* User.php
+* ExpenseCreated.php
+* ExpenseCreatedListener.php
+* LoginRepository.php
+* EmailService.php
+* CardRequest.php
+* ExpenseRequest.php
+* LoginRequest.php
+* UserRegisterRequest.php
+* UserRequest.php
+* routes.php
+* migrations
 
-When you don't want to use Docker as the basis for your running environment, you need to make sure that your operating environment meets the following requirements:  
+## Começando
 
- - PHP >= 8.1
- - Any of the following network engines
-   - Swoole PHP extension >= 5.0，with `swoole.use_shortname` set to `Off` in your `php.ini`
-   - Swow PHP extension >= 1.3
- - JSON PHP extension
- - Pcntl PHP extension
- - OpenSSL PHP extension （If you need to use the HTTPS）
- - PDO PHP extension （If you need to use the MySQL Client）
- - Redis PHP extension （If you need to use the Redis Client）
- - Protobuf PHP extension （If you need to use the gRPC Server or Client）
+Para começar a utilizar a Api de despesas, você precisa ter o seguinte configurado:
 
-# Installation using Composer
-
-The easiest way to create a new Hyperf project is to use [Composer](https://getcomposer.org/). If you don't have it already installed, then please install as per [the documentation](https://getcomposer.org/download/).
-
-To create your new Hyperf project:
-
-```bash
-composer create-project hyperf/hyperf-skeleton path/to/install
+- Docker: Certifique-se de que o Docker está instalado e disponível no seu sistema. Você pode verificar se o PHP está instalado executando o seguinte comando:
+``` bash
+$  docker --version
 ```
 
-If your development environment is based on Docker you can use the official Composer image to create a new Hyperf project:
-
-```bash
-docker run --rm -it -v $(pwd):/app composer create-project --ignore-platform-reqs hyperf/hyperf-skeleton path/to/install
+- PHP: Certifique-se de que o PHP está instalado e disponível no seu sistema. Você pode verificar se o PHP está instalado executando o seguinte comando:
+``` bash
+$  php --version
 ```
 
-# Getting started
-
-Once installed, you can run the server immediately using the command below.
-
-```bash
-cd path/to/install
-php bin/hyperf.php start
+- Composer: Certifique-se de que o Composer está instalado e disponível no seu sistema. Você pode verificar se o Composer está instalado executando o seguinte comando:
+``` bash
+$  composer --version
 ```
 
-Or if in a Docker based environment you can use the `docker-compose.yml` provided by the template:
+## Clonando o projeto
 
-```bash
-cd path/to/install
-docker-compose up
+Escolha uma das opções abaixo ou baixe o projeto em formato zip:
+
+``` bash
+$    HTTPS - git clone https://github.com/hugojose39/api-expenses-hyperf.git
+$    SSH - git clone git@github.com:hugojose39/api-expenses-hyperf.git
+$    GitHub CLI - gh repo clone hugojose39/api-expenses-hyperf.git
 ```
 
-This will start the cli-server on port `9501`, and bind it to all network interfaces. You can then visit the site at `http://localhost:9501/` which will bring up Hyperf default home page.
+Quando o projeto estiver em seu computador, acesse sua pasta e execute os comandos no seu terminal:
 
-## Hints
+1. Crie o arquivo .env de acordo com o .env.example, nele estará a configuração para envio de emails e banco de dados.
 
-- A nice tip is to rename `hyperf-skeleton` of files like `composer.json` and `docker-compose.yml` to your actual project name.
-- Take a look at `config/routes.php` and `app/Controller/IndexController.php` to see an example of a HTTP entrypoint.
+2. Construa a imagem do Docker com o comando abaixo:
+    ```bash
+    docker compose build --force-rm
+    ```
 
-**Remember:** you can always replace the contents of this README.md file to something that fits your project description.
+3. Para acessar a linha de comando da aplicação, execute o comando abaixo:
+
+   **O comando docker-compose run --user=root app bash permite acessar o contêiner do aplicativo Docker como usuário root.**
+    ```bash
+    docker compose run --user=root app bash
+    ```
+
+4. Na linha de comando da aplicação, instale as dependências da aplicação com o comando abaixo:
+
+   - Nesta parte será necessário que você dê permissões de gravação temporária, basta selecionar a opção **Y**.
+
+    ```bash
+    composer install
+    ```
+
+5. Ainda linha de comando da aplicação, execute as migrations da aplicação com o comando abaixo:
+
+    ```bash
+    bin/cake migrations migrate
+    ```
+
+6. Para sair da linha de comando da aplicação, execute o comando abaixo:
+    ```bash
+    exit
+    ```
+
+7. Execute o comando abaixo para iniciar a aplicação:
+    ```bash
+    docker compose up -d
+    ```
+
+8. Execute o comando abaixo para parar a aplicação:
+    ```bash
+    docker compose down
+    ```
+
+## Autenticação
+
+Essa Api faz o uso da autenticação via JWT token e possui rotas que verificam o scope do token.
+
+Exemplo: A rota indexAll destinada a listagem completa dos dados do usuário, do cartão e das despesas so pode ser acessada por usuário que possuem o scope = admin, que está ligado ao type do usuário.
+
+- Para obter um token de acesso, será preciso registrar um usuário para isso envie uma solicitação POST para rota /api/register. A solicitação deve conter os seguintes campos:
+   - *email*: O endereço de e-mail do usuário.
+   - *name*: Nome do usuário.
+   - *password*: A senha do usuário.
+   - *type*: Tipo do usuário se ele é admin ou um usuário comum.
+
+- Após o registro envie uma solicitação POST para a rota /api/token, para obter o token de forma efetiva:
+   - *email*: O endereço de e-mail do usuário.
+   - *password*: Nome do token. A senha do usuário.
+
+## Uso
+
+A aplicação deve ser acessível em `http://localhost:9501`.
+
+## Endpoints
+
+### A API fornece os seguintes endpoints:
+
+POST /api/register: Registra um usuário.
+
+POST /api/login: Cria a token de autenticação (Guarde ela com atenção pois será utilizada nas demais requisições).
+
+POST /api/cards: Cria um novo cartão.
+
+GET /api/cards/indexAll: Lista todos os cartões, apenas usuários do tipo admin possuem acesso.
+
+GET /api/cards: Lista todos as cartões do usuário.
+
+GET /api/cards/{id}: Obtém um cartão específico.
+
+PUT /api/cards/{id}: Atualiza um cartão especifico.
+
+DELETE /api/cards/{id}: Exclui um cartão específico.
+
+POST /api/expenses: Cria uma nova despesa.
+
+GET /api/expenses/indexAll: Lista todas as despesas, apenas usuários do tipo admin possuem acesso.
+
+GET /api/expenses: Lista todas as despesas do usuário.
+
+GET /api/expenses/{id}: Obtém uma despesa específica.
+
+PUT /api/expenses/{id}: Atualiza uma despesa específica.
+
+DELETE /api/expenses/{id}: Exclui uma despesa específica.
+
+GET /api/users/indexAll: Lista todos os usuários, apenas usuários do tipo admin possuem acesso.
+
+GET /api/users/{id}: Obtém um usuário específico.
+
+PUT /api/users/{id}: Atualiza um usuário específico.
+
+DELETE /api/users/{id}: Exclui um usuário específico.
+
+## Exemplos:
+
+### Registra um novo usuário
+
+curl -X POST
+
+- H "Content-Type: application/json"
+- d `{ "email": "johndoe@example.com", "name": "John Doe", "password": "Password1234", "type": "admin" }`
+
+http://localhost:9501/api/register
+
+### Obter um token de acesso
+
+curl -X POST
+
+- H "Content-Type: application/json"
+- d `{ "email": "johndoe@example.com", "password": "Password1234" }`
+
+http://localhost:9501/api/login
+
+### Listar todos os cartões
+Middleware: AdminMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/cards/indexAll
+
+### Listar todos os cartões do usuário
+Middleware: AuthMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/cards
+
+### Criar um novo cartão
+Middleware: AuthMiddleware
+
+curl -X POST
+
+- H "Authorization: {token}"
+- H "Content-Type: application/json"
+- d `{ "number": 1234567489, "user_id": 1, "balance": 100 }`
+
+http://localhost:9501/api/cards
+
+### Listar um cartão específico
+Middleware: AuthMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/cards/1
+
+### Atualizar um cartão
+Middleware: AuthMiddleware
+
+curl -X PUT
+
+- H "Authorization: {token}"
+- H "Content-Type: application/json"
+- d `{ "number": 1234567489, "user_id": 1, "balance": 100 }`
+
+http://localhost:9501/api/cards/1
+
+### Excluir um cartão
+Middleware: AuthMiddleware
+
+curl -X DELETE
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/cards/1
+
+### Listar todas as despesas
+Middleware: AdminMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/expenses/indexAll
+
+### Listar todas as despesas do usuário
+Middleware: AuthMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/expenses
+
+### Criar uma nova despesa
+Middleware: AuthMiddleware
+
+curl -X POST
+
+- H "Authorization: {token}"
+- H "Content-Type: application/json"
+- d `{ "description": "Despesa de teste", "card_id": 1, "amount": 100 }`
+
+http://localhost:9501/api/expenses
+
+### Listar uma despesa específica
+Middleware: AuthMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/expenses/1
+
+### Atualizar uma despesa
+Middleware: AuthMiddleware
+
+curl -X PUT
+
+- H "Authorization: {token}"
+- H "Content-Type: application/json"
+- d `{ "description": "Despesa de teste", "card_id": 1, "amount": 100 }`
+
+http://localhost:9501/api/expenses/1
+
+### Excluir uma despesa
+Middleware: AuthMiddleware
+
+curl -X DELETE
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/expenses/1
+
+### Listar todos as usuários
+Middleware: AdminMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/users/indexAll
+
+### Listar um usuário específico
+Middleware: AuthMiddleware
+
+curl -X GET
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/users/1
+
+### Atualizar um usuário
+Middleware: AuthMiddleware
+
+curl -X PUT
+
+- H "Authorization: {token}"
+- H "Content-Type: application/json"
+- d `{ "name": John Doe, "email": "johndoe@example.com", "password": "Password1234" }`
+
+http://localhost:9501/api/users/1
+
+### Excluir um usuário
+Middleware: AuthMiddleware
+
+curl -X DELETE
+
+- H "Authorization: {token}"
+
+http://localhost:9501/api/users/1

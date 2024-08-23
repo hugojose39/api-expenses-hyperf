@@ -11,8 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 class CardController extends AbstractController
 {
     public function __construct(
-        private readonly Card $card)
-    {
+        private readonly Card $card
+    ) {
     }
 
     public function indexAll(): ResponseInterface
@@ -25,7 +25,6 @@ class CardController extends AbstractController
     public function index(): ResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-
         $cards = $this->card->where('user_id', $user->id)->get();
 
         return $this->response->json($cards);
@@ -47,8 +46,6 @@ class CardController extends AbstractController
     {
         $user = $this->getAuthenticatedUser();
         $input = $request->validated();
-
-        // Apenas o usuário autenticado pode criar cartões para si mesmo
         $input['user_id'] = $user->id;
         $card = $this->card->create($input);
 
@@ -60,8 +57,6 @@ class CardController extends AbstractController
         $user = $this->getAuthenticatedUser();
         $card = $this->card->findOrFail($id);
 
-        // Administradores podem atualizar qualquer cartão
-        // Usuários comuns só podem atualizar seus próprios cartões
         if ($user->type === 'admin' || $card->user_id === $user->id) {
             $card->update($request->validated());
             return $this->response->json($card);
@@ -75,8 +70,6 @@ class CardController extends AbstractController
         $user = $this->getAuthenticatedUser();
         $card = $this->card->findOrFail($id);
 
-        // Administradores podem deletar qualquer cartão
-        // Usuários comuns só podem deletar seus próprios cartões
         if ($user->type === 'admin' || $card->user_id === $user->id) {
             $card->delete();
             return $this->response->json(['message' => 'Cartão deletado com sucesso']);

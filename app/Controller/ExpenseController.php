@@ -16,23 +16,21 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 class ExpenseController extends AbstractController
 {
     public function __construct(
-        private readonly Card                     $card,
-        private readonly Expense                  $expense,
-        private readonly User                     $user,
+        private readonly Card $card,
+        private readonly Expense $expense,
+        private readonly User $user,
         private readonly EventDispatcherInterface $eventDispatcher
-    )
-    {
+    ) {
     }
 
     public function store(ExpenseRequest $request): ResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-
         $input = $request->validated();
 
         $card = $this->card->findOrFail($input['card_id']);
 
-        if (!$card->hasSufficientBalance($input['amount'])) {
+        if (!$card->hasSufficientBalance((float)$input['amount'])) {
             return $this->response->json(['message' => 'Saldo insuficiente'])->withStatus(422);
         }
 
@@ -42,11 +40,11 @@ class ExpenseController extends AbstractController
             function () use ($input) {
                 $this->expense->create($input);
             },
-            $user['id']
+            $user->id
         );
 
         if (!empty($parallel->wait())) {
-            $card->balance -= $input['amount'];
+            $card->balance -= (float)$input['amount'];
             $card->save();
 
             $users = $this->user->where(function ($query) use ($user) {
@@ -59,7 +57,7 @@ class ExpenseController extends AbstractController
             return $this->response->json(['message' => 'Despesa criada com sucesso'])->withStatus(201);
         }
 
-        return $this->response->json(['message' => 'Não foi possivel criar sua despesa'])->withStatus(422);
+        return $this->response->json(['message' => 'Não foi possível criar sua despesa'])->withStatus(422);
     }
 
     public function indexAll(): ResponseInterface

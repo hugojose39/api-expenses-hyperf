@@ -40,7 +40,4 @@ class UserRegisterRequest extends FormRequest
             'password.min' => 'O campo tipo deve ter pelo menos :min caracteres.',
         ];
     }
-
-
-
 }

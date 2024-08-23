@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Interfaces\LoginRepositoryInterface;
@@ -11,13 +13,13 @@ use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use function Hyperf\Support\env;
 
-class LoginRepository implements LoginRepositoryInterface 
+class LoginRepository implements LoginRepositoryInterface
 {
-    protected $jwtSecretKey;
+    private string $jwtSecretKey;
 
     public function __construct()
     {
-        $this->jwtSecretKey = env('JWT_SECRET_KEY');
+        $this->jwtSecretKey = env('JWT_SECRET_KEY', '');
     }
 
     public function login(LoginRequest $request): array
@@ -49,7 +51,7 @@ class LoginRepository implements LoginRepositoryInterface
         }
     }
 
-    private function getUserByEmail($email): ?User
+    private function getUserByEmail(string $email): ?User
     {
         return User::where('email', $email)->first();
     }
@@ -60,18 +62,14 @@ class LoginRepository implements LoginRepositoryInterface
 
         $user = User::create([
             'uuid' => Uuid::uuid4()->toString(),
-            'name' => $input['name'], 
-            'email' => $input['email'], 
+            'name' => $input['name'],
+            'email' => $input['email'],
             'password' => password_hash($input['password'], PASSWORD_BCRYPT),
             'type' => $input['type'],
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);
-        
-        if($user){
-            return true;
-        }
-        return false;
-    }
 
+        return $user instanceof User;
+    }
 }
