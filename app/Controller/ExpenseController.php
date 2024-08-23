@@ -33,7 +33,7 @@ class ExpenseController extends AbstractController
         $card = $this->card->findOrFail($input['card_id']);
 
         if (!$card->hasSufficientBalance($input['amount'])) {
-            return $this->response->json(['message' => 'Saldo insuficiente'], 422);
+            return $this->response->json(['message' => 'Saldo insuficiente'])->withStatus(422);
         }
 
         $parallel = new Parallel();
@@ -55,9 +55,11 @@ class ExpenseController extends AbstractController
             })->get();
 
             $this->eventDispatcher->dispatch(new ExpenseCreated($users));
+
+            return $this->response->json(['message' => 'Despesa criada com sucesso'])->withStatus(201);
         }
 
-        return $this->response->json(['message' => 'Despesa criada com sucesso']);
+        return $this->response->json(['message' => 'Não foi possivel criar sua despesa'])->withStatus(422);
     }
 
     public function indexAll(): ResponseInterface
@@ -79,7 +81,7 @@ class ExpenseController extends AbstractController
         $expense = $this->expense->where('id', $id)->where('user_id', $user->id)->first();
 
         if (!$expense) {
-            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'], 403);
+            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
         }
 
         return $this->response->json($expense);
@@ -91,7 +93,7 @@ class ExpenseController extends AbstractController
         $expense = $this->expense->where('id', $id)->where('user_id', $user->id)->first();
 
         if (!$expense) {
-            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'], 403);
+            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
         }
 
         $expense->delete();

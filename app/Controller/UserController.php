@@ -41,7 +41,7 @@ class UserController extends AbstractController
         }
 
         // Usuários comuns não têm permissão para ver outros usuários
-        return $this->response->json(['message' => 'Acesso negado'], 403);
+        return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 
     public function delete(int $id): ResponseInterface
@@ -56,7 +56,7 @@ class UserController extends AbstractController
         }
 
         // Usuários comuns não têm permissão para deletar outros usuários
-        return $this->response->json(['message' => 'Acesso negado'], 403);
+        return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 
     public function update(UserRequest $request, int $id): ResponseInterface
@@ -71,6 +71,6 @@ class UserController extends AbstractController
         }
 
         // Usuários comuns não têm permissão para atualizar outros usuários
-        return $this->response->json(['message' => 'Acesso negado'], 403);
+        return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 }

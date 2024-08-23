@@ -40,7 +40,7 @@ class CardController extends AbstractController
             return $this->response->json($card);
         }
 
-        return $this->response->json(['message' => 'Acesso negado'], 403);
+        return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 
     public function store(CardRequest $request): ResponseInterface
@@ -52,7 +52,7 @@ class CardController extends AbstractController
         $input['user_id'] = $user->id;
         $card = $this->card->create($input);
 
-        return $this->response->json($card);
+        return $this->response->json($card)->withStatus(201);
     }
 
     public function update(CardRequest $request, int $id): ResponseInterface
@@ -67,7 +67,7 @@ class CardController extends AbstractController
             return $this->response->json($card);
         }
 
-        return $this->response->json(['message' => 'Acesso negado'], 403);
+        return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 
     public function delete(int $id): ResponseInterface
@@ -82,6 +82,6 @@ class CardController extends AbstractController
             return $this->response->json(['message' => 'Cartão deletado com sucesso']);
         }
 
-        return $this->response->json(['message' => 'Acesso negado'], 403);
+        return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 }

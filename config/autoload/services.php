@@ -26,4 +26,7 @@ return [
             ],
         ],
     ],
+    App\Service\EmailService::class => [
+        'class' => App\Service\EmailService::class,
+    ],
 ];
