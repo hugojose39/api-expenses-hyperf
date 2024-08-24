@@ -10,7 +10,7 @@ use App\Model\Expense;
 use App\Model\User;
 use App\Request\ExpenseRequest;
 use Hyperf\Coroutine\Parallel;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 class ExpenseController extends AbstractController
@@ -23,7 +23,38 @@ class ExpenseController extends AbstractController
     ) {
     }
 
-    public function store(ExpenseRequest $request): ResponseInterface
+    public function indexAll(): PsrResponseInterface
+    {
+        $expenses = $this->expense->all();
+        return $this->response->json($expenses);
+    }
+
+    public function index(): PsrResponseInterface
+    {
+        $user = $this->getAuthenticatedUser();
+        $expenses = $this->expense->whereHas('card', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->get();
+
+        return $this->response->json($expenses);
+    }
+
+    public function show(int $id): PsrResponseInterface
+    {
+        $user = $this->getAuthenticatedUser();
+        $expense = $this->expense->where('id', $id)
+            ->whereHas('card', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->first();
+
+        if (!$expense) {
+            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
+        }
+
+        return $this->response->json($expense);
+    }
+
+    public function store(ExpenseRequest $request): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
         $input = $request->validated();
@@ -60,35 +91,44 @@ class ExpenseController extends AbstractController
         return $this->response->json(['message' => 'Não foi possível criar sua despesa'])->withStatus(422);
     }
 
-    public function indexAll(): ResponseInterface
-    {
-        $expenses = $this->expense->all();
-        return $this->response->json($expenses);
-    }
-
-    public function index(): ResponseInterface
+    public function update(ExpenseRequest $request, int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $expenses = $this->expense->where('user_id', $user->id)->get();
-        return $this->response->json($expenses);
-    }
+        $input = $request->validated();
 
-    public function show(int $id): ResponseInterface
-    {
-        $user = $this->getAuthenticatedUser();
-        $expense = $this->expense->where('id', $id)->where('user_id', $user->id)->first();
+        $card = $this->card->findOrFail($input['card_id']);
+        $expense = $this->expense->findOrFail($id);
 
-        if (!$expense) {
-            return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
+        if (!$card->hasSufficientBalance((float)$input['amount'])) {
+            return $this->response->json(['message' => 'Saldo insuficiente'])->withStatus(422);
         }
 
-        return $this->response->json($expense);
+        $parallel = new Parallel();
+
+        $parallel->add(
+            function () use ($input, $expense) {
+                $expense->update($input);
+            },
+            $user->id
+        );
+
+        if (!empty($parallel->wait())) {
+            $card->balance -= (float)$input['amount'];
+            $card->save();
+
+            return $this->response->json($expense);
+        }
+
+        return $this->response->json(['message' => 'Não foi possível atualizar sua despesa'])->withStatus(422);
     }
 
-    public function delete(int $id): ResponseInterface
+    public function delete(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $expense = $this->expense->where('id', $id)->where('user_id', $user->id)->first();
+        $expense = $this->expense->where('id', $id)
+            ->whereHas('card', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->first();
 
         if (!$expense) {
             return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);

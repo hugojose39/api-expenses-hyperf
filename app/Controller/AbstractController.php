@@ -1,6 +1,14 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @link     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace App\Controller;
 
@@ -9,7 +17,6 @@ use Hyperf\Di\Annotation\Inject;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Psr\Container\ContainerInterface;
-use Hyperf\HttpMessage\Server\Response;
 
 abstract class AbstractController
 {
@@ -22,11 +29,11 @@ abstract class AbstractController
     #[Inject]
     protected ResponseInterface $response;
 
-    public function getAuthenticatedUser(): User|ResponseInterface
+    public function getAuthenticatedUser()
     {
         $user = $this->container->get('user');
 
-        if (!$user) {
+        if (is_null($user)) {
             return $this->response->json(['message' => 'Usuário não autenticado'], 401);
         }
 

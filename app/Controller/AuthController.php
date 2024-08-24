@@ -20,7 +20,7 @@ class AuthController
         $this->response = $response;
     }
 
-    public function login(LoginRequest $request): PsrResponseInterface
+    public function login(LoginRequest $request): array
     {
         return $this->loginRepository->login($request);
     }

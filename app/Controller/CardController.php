@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Model\Card;
 use App\Request\CardRequest;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class CardController extends AbstractController
 {
@@ -15,14 +15,14 @@ class CardController extends AbstractController
     ) {
     }
 
-    public function indexAll(): ResponseInterface
+    public function indexAll(): PsrResponseInterface
     {
         $cards = $this->card->all();
 
         return $this->response->json($cards);
     }
 
-    public function index(): ResponseInterface
+    public function index(): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
         $cards = $this->card->where('user_id', $user->id)->get();
@@ -30,7 +30,7 @@ class CardController extends AbstractController
         return $this->response->json($cards);
     }
 
-    public function show(int $id): ResponseInterface
+    public function show(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
         $card = $this->card->findOrFail($id);
@@ -42,7 +42,7 @@ class CardController extends AbstractController
         return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 
-    public function store(CardRequest $request): ResponseInterface
+    public function store(CardRequest $request): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
         $input = $request->validated();
@@ -52,7 +52,7 @@ class CardController extends AbstractController
         return $this->response->json($card)->withStatus(201);
     }
 
-    public function update(CardRequest $request, int $id): ResponseInterface
+    public function update(CardRequest $request, int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
         $card = $this->card->findOrFail($id);
@@ -65,7 +65,7 @@ class CardController extends AbstractController
         return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
     }
 
-    public function delete(int $id): ResponseInterface
+    public function delete(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
         $card = $this->card->findOrFail($id);
