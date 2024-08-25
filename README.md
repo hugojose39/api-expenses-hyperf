@@ -122,6 +122,11 @@ Quando o projeto estiver em seu computador, acesse sua pasta e execute os comand
     docker exec -it hyperf php bin/hyperf.php migrate:rollback
     ```
 
+11. Para monitoramento dos logs do container da aplicação, execute o comando abaixo:
+    ```bash
+    docker logs -f hyperf
+    ```
+
 11. Execute o comando abaixo para parar a aplicação:
     ```bash
     docker compose down
