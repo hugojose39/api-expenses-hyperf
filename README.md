@@ -13,6 +13,7 @@ Baixe o código-fonte em um arquivo zip, ou, se você tiver o Git instalado, use
 * Docker
 * JWT
 * PHP Mailer
+* PHP Unit
 
 ## Principais Arquivos
 * AdminMiddleware.php
@@ -37,6 +38,7 @@ Baixe o código-fonte em um arquivo zip, ou, se você tiver o Git instalado, use
 * UserRequest.php
 * routes.php
 * migrations
+* test
 
 ## Começando
 
@@ -71,43 +73,56 @@ Quando o projeto estiver em seu computador, acesse sua pasta e execute os comand
 
 1. Crie o arquivo .env de acordo com o .env.example, nele estará a configuração para envio de emails e banco de dados.
 
-2. Construa a imagem do Docker com o comando abaixo:
+2. Execute o comando abaixo para iniciar a aplicação:
     ```bash
-    docker compose build --force-rm
+    docker compose up -d
     ```
 
-3. Para acessar a linha de comando da aplicação, execute o comando abaixo:
+3. Para acessar o container do banco de dados da aplicação, execute o comando abaixo:
 
-   **O comando docker-compose run --user=root app bash permite acessar o contêiner do aplicativo Docker como usuário root.**
     ```bash
-    docker compose run --user=root app bash
+    docker exec -it expenses-mysql-1 mysql -uroot -ppassword
     ```
 
-4. Na linha de comando da aplicação, instale as dependências da aplicação com o comando abaixo:
+4. Para criar o banco de dados da aplicação, execute o comando abaixo:
 
-   - Nesta parte será necessário que você dê permissões de gravação temporária, basta selecionar a opção **Y**.
+    ```bash
+    CREATE DATABASE `expenses-mysql`;
+    ```
+
+5. Para sair do container do banco de dados da aplicação, execute o comando abaixo:
+    ```bash
+    exit
+    ```
+
+6. Para acessar o container da aplicação, execute o comando abaixo:
+
+    ```bash
+    docker exec -it hyperf /bin/sh
+    ```
+
+7. Na linha de comando da aplicação, instale as dependências da aplicação com o comando abaixo:
 
     ```bash
     composer install
     ```
 
-5. Ainda linha de comando da aplicação, execute as migrations da aplicação com o comando abaixo:
-
-    ```bash
-    bin/cake migrations migrate
-    ```
-
-6. Para sair da linha de comando da aplicação, execute o comando abaixo:
+8. Para sair do container da aplicação, execute o comando abaixo:
     ```bash
     exit
     ```
 
-7. Execute o comando abaixo para iniciar a aplicação:
+9. Para executar a migrations do banco de dados, execute o comando abaixo:
     ```bash
-    docker compose up -d
+    docker exec -it hyperf php bin/hyperf.php migrate
     ```
 
-8. Execute o comando abaixo para parar a aplicação:
+10. Para voltar as migrations do banco de dados, execute o comando abaixo:
+    ```bash
+    docker exec -it hyperf php bin/hyperf.php migrate:rollback
+    ```
+
+11. Execute o comando abaixo para parar a aplicação:
     ```bash
     docker compose down
     ```
@@ -345,3 +360,14 @@ curl -X DELETE
 - H "Authorization: {token}"
 
 http://localhost:9501/api/users/1
+
+## Testes:
+
+Para executar todos os testes de uma única vez execute o seguinte comando, dentro do container:
+
+```bash
+docker exec -it hyperf /bin/sh
+```
+```bash
+composer test
+```
