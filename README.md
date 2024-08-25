@@ -95,39 +95,49 @@ Quando o projeto estiver em seu computador, acesse sua pasta e execute os comand
     exit
     ```
 
-6. Para acessar o container da aplicação, execute o comando abaixo:
-
-    ```bash
-    docker exec -it hyperf /bin/sh
-    ```
-
-7. Na linha de comando da aplicação, instale as dependências da aplicação com o comando abaixo:
+6. Após sair do container do banco de dados da aplicação, instale as dependências da aplicação com o comando abaixo:
 
     ```bash
     composer install
     ```
 
-8. Para sair do container da aplicação, execute o comando abaixo:
+7. Depois de instalar as dependências da aplicação, derrube o container e suba de novo com o comando abaixo:
+
+    ```bash
+    docker compose down
+    ```
+   
+    ```bash
+    docker compose up -d
+    ```
+
+8. Para acessar o container da aplicação, execute o comando abaixo:
+
+    ```bash
+    docker exec -it hyperf /bin/sh
+    ```
+
+9. Para sair do container da aplicação, execute o comando abaixo:
     ```bash
     exit
     ```
 
-9. Para executar a migrations do banco de dados, execute o comando abaixo:
+10. Para executar a migrations do banco de dados, execute o comando abaixo:
     ```bash
     docker exec -it hyperf php bin/hyperf.php migrate
     ```
 
-10. Para voltar as migrations do banco de dados, execute o comando abaixo:
+11. Para voltar as migrations do banco de dados, execute o comando abaixo:
     ```bash
     docker exec -it hyperf php bin/hyperf.php migrate:rollback
     ```
 
-11. Para monitoramento dos logs do container da aplicação, execute o comando abaixo:
+12. Para monitoramento dos logs do container da aplicação, execute o comando abaixo:
     ```bash
     docker logs -f hyperf
     ```
 
-11. Execute o comando abaixo para parar a aplicação:
+13. Execute o comando abaixo para parar a aplicação:
     ```bash
     docker compose down
     ```
