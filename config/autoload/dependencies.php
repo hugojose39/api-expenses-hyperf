@@ -2,8 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Interfaces\CardRepositoryInterface;
+use App\Repositories\CardRepository;
+use App\Interfaces\ExpenseRepositoryInterface;
+use App\Repositories\ExpenseRepository;
 use App\Interfaces\LoginRepositoryInterface;
 use App\Repositories\LoginRepository;
+use App\Interfaces\UserRepositoryInterface;
+use App\Repositories\UserRepository;
 
 /**
  * This file is part of Hyperf.
@@ -14,5 +20,8 @@ use App\Repositories\LoginRepository;
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 return [
-    LoginRepositoryInterface::class => LoginRepository::class, 
+    CardRepositoryInterface::class => CardRepository::class,
+    ExpenseRepositoryInterface::class => ExpenseRepository::class,
+    LoginRepositoryInterface::class => LoginRepository::class,
+    UserRepositoryInterface::class => UserRepository::class,
 ];

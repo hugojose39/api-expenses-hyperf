@@ -4,36 +4,34 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Model\Card;
+use App\Interfaces\CardRepositoryInterface;
 use App\Request\CardRequest;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class CardController extends AbstractController
 {
     public function __construct(
-        private readonly Card $card
+        private readonly CardRepositoryInterface $cardRepository
     ) {
     }
 
     public function indexAll(): PsrResponseInterface
     {
-        $cards = $this->card->all();
-
+        $cards = $this->cardRepository->all();
         return $this->response->json($cards);
     }
 
     public function index(): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $cards = $this->card->where('user_id', $user->id)->get();
-
+        $cards = $this->cardRepository->findByUserId($user->id);
         return $this->response->json($cards);
     }
 
     public function show(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $card = $this->card->findOrFail($id);
+        $card = $this->cardRepository->findOrFail($id);
 
         if ($card->user_id === $user->id) {
             return $this->response->json($card);
@@ -47,19 +45,19 @@ class CardController extends AbstractController
         $user = $this->getAuthenticatedUser();
         $input = $request->validated();
         $input['user_id'] = $user->id;
-        $card = $this->card->create($input);
 
+        $card = $this->cardRepository->create($input);
         return $this->response->json($card)->withStatus(201);
     }
 
     public function update(CardRequest $request, int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $card = $this->card->findOrFail($id);
+        $card = $this->cardRepository->findOrFail($id);
 
         if ($user->type === 'admin' || $card->user_id === $user->id) {
-            $card->update($request->validated());
-            return $this->response->json($card);
+            $updatedCard = $this->cardRepository->update($card, $request->validated());
+            return $this->response->json($updatedCard);
         }
 
         return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
@@ -68,10 +66,10 @@ class CardController extends AbstractController
     public function delete(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $card = $this->card->findOrFail($id);
+        $card = $this->cardRepository->findOrFail($id);
 
         if ($user->type === 'admin' || $card->user_id === $user->id) {
-            $card->delete();
+            $this->cardRepository->delete($card);
             return $this->response->json(['message' => 'Cartão deletado com sucesso']);
         }
 

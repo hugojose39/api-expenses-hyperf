@@ -39,9 +39,9 @@ class LoginRepository implements LoginRepositoryInterface
             $token = $jwtService->generateToken($tokenPayload);
 
             return ['token' => $token];
-        } else {
-            return ['error' => 'Senha incorreta'];
         }
+
+        return ['error' => 'Senha incorreta'];
     }
 
     private function getUserByEmail(string $email): ?User

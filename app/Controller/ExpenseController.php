@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Event\ExpenseCreated;
+use App\Interfaces\ExpenseRepositoryInterface;
 use App\Model\Card;
-use App\Model\Expense;
 use App\Model\User;
 use App\Request\ExpenseRequest;
 use Hyperf\Coroutine\Parallel;
@@ -16,8 +16,8 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 class ExpenseController extends AbstractController
 {
     public function __construct(
+        private readonly ExpenseRepositoryInterface $expenseRepository,
         private readonly Card $card,
-        private readonly Expense $expense,
         private readonly User $user,
         private readonly EventDispatcherInterface $eventDispatcher
     ) {
@@ -25,27 +25,21 @@ class ExpenseController extends AbstractController
 
     public function indexAll(): PsrResponseInterface
     {
-        $expenses = $this->expense->all();
+        $expenses = $this->expenseRepository->all();
         return $this->response->json($expenses);
     }
 
     public function index(): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $expenses = $this->expense->whereHas('card', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get();
-
+        $expenses = $this->expenseRepository->findByCardAndUser($user->id, $user->id);
         return $this->response->json($expenses);
     }
 
     public function show(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $expense = $this->expense->where('id', $id)
-            ->whereHas('card', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->first();
+        $expense = $this->expenseRepository->findByCardAndUser($id, $user->id);
 
         if (!$expense) {
             return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
@@ -68,9 +62,7 @@ class ExpenseController extends AbstractController
         $parallel = new Parallel();
 
         $parallel->add(
-            function () use ($input) {
-                $this->expense->create($input);
-            },
+            fn () => $this->expenseRepository->create($input),
             $user->id
         );
 
@@ -78,10 +70,8 @@ class ExpenseController extends AbstractController
             $card->balance -= (float)$input['amount'];
             $card->save();
 
-            $users = $this->user->where(function ($query) use ($user) {
-                $query->where('id', $user->id)
-                    ->orWhere('type', 'admin');
-            })->get();
+            $users = $this->user->where(fn ($query) => $query->where('id', $user->id)
+                ->orWhere('type', 'admin'))->get();
 
             $this->eventDispatcher->dispatch(new ExpenseCreated($users));
 
@@ -97,7 +87,7 @@ class ExpenseController extends AbstractController
         $input = $request->validated();
 
         $card = $this->card->findOrFail($input['card_id']);
-        $expense = $this->expense->findOrFail($id);
+        $expense = $this->expenseRepository->findOrFail($id);
 
         if (!$card->hasSufficientBalance((float)$input['amount'])) {
             return $this->response->json(['message' => 'Saldo insuficiente'])->withStatus(422);
@@ -106,9 +96,7 @@ class ExpenseController extends AbstractController
         $parallel = new Parallel();
 
         $parallel->add(
-            function () use ($input, $expense) {
-                $expense->update($input);
-            },
+            fn () => $this->expenseRepository->update($expense, $input),
             $user->id
         );
 
@@ -125,16 +113,13 @@ class ExpenseController extends AbstractController
     public function delete(int $id): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $expense = $this->expense->where('id', $id)
-            ->whereHas('card', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->first();
+        $expense = $this->expenseRepository->findByCardAndUser($id, $user->id);
 
         if (!$expense) {
             return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
         }
 
-        $expense->delete();
+        $this->expenseRepository->delete($expense);
         return $this->response->json(['message' => 'Despesa apagada com sucesso']);
     }
 }

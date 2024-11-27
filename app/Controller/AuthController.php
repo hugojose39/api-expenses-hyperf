@@ -33,10 +33,8 @@ class AuthController
             return $this->response->json([
                 'message' => 'Usuário cadastrado com sucesso.'
             ])->withStatus(201);
-        } else {
-            return $this->response->json([
-                'error' => 'Não foi possível realizar o cadastro.'
-            ])->withStatus(500);
         }
+
+        return $this->response->json(['error' => 'Não foi possível realizar o cadastro.'])->withStatus(500);
     }
 }

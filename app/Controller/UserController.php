@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Interfaces\UserRepositoryInterface;
 use App\Model\User;
 use App\Request\UserRequest;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class UserController extends AbstractController
 {
-    public function __construct(private readonly User $user)
+    public function __construct(private readonly UserRepositoryInterface $userRepository)
     {
     }
 
     public function indexAll(): PsrResponseInterface
     {
-        $users = $this->user->all();
+        $users = $this->userRepository->all();
         return $this->response->json($users);
     }
 
@@ -25,7 +26,7 @@ class UserController extends AbstractController
         $user = $this->getAuthenticatedUser();
 
         if ($user->type === 'admin' || $user->id === $id) {
-            $userToShow = $this->user->findOrFail($id);
+            $userToShow = $this->userRepository->findOrFail($id);
             return $this->response->json($userToShow);
         }
 
@@ -37,9 +38,9 @@ class UserController extends AbstractController
         $user = $this->getAuthenticatedUser();
 
         if ($user->type === 'admin' || $user->id === $id) {
-            $userToUpdate = $this->user->findOrFail($id);
-            $userToUpdate->update($request->validated());
-            return $this->response->json($userToUpdate);
+            $userToUpdate = $this->userRepository->findOrFail($id);
+            $updatedUser = $this->userRepository->update($userToUpdate, $request->validated());
+            return $this->response->json($updatedUser);
         }
 
         return $this->response->json(['message' => 'Acesso negado'])->withStatus(403);
@@ -50,8 +51,8 @@ class UserController extends AbstractController
         $user = $this->getAuthenticatedUser();
 
         if ($user->type === 'admin' || $user->id === $id) {
-            $userToDelete = $this->user->findOrFail($id);
-            $userToDelete->delete();
+            $userToDelete = $this->userRepository->findOrFail($id);
+            $this->userRepository->delete($userToDelete);
             return $this->response->json(['message' => 'Usuário deletado com sucesso']);
         }
 
