@@ -8,20 +8,12 @@ use App\Interfaces\LoginRepositoryInterface;
 use App\Model\User;
 use App\Request\LoginRequest;
 use App\Request\UserRegisterRequest;
-use Firebase\JWT\JWT;
+use App\Services\JWTService;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
-use function Hyperf\Support\env;
 
 class LoginRepository implements LoginRepositoryInterface
 {
-    private string $jwtSecretKey;
-
-    public function __construct()
-    {
-        $this->jwtSecretKey = env('JWT_SECRET_KEY', '');
-    }
-
     public function login(LoginRequest $request): array
     {
         $input = $request->validated();
@@ -43,7 +35,8 @@ class LoginRepository implements LoginRepositoryInterface
                 'iat' => time(),
             ];
 
-            $token = JWT::encode($tokenPayload, $this->jwtSecretKey, 'HS256');
+            $jwtService = JWTService::getInstance();
+            $token = $jwtService->generateToken($tokenPayload);
 
             return ['token' => $token];
         } else {

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Services\JWTService;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use Hyperf\Di\Container;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use function Hyperf\Support\env;
 
 class AuthMiddleware
 {
@@ -35,7 +33,8 @@ class AuthMiddleware
         }
 
         try {
-            $decoded = JWT::decode($token[0], new Key($this->jwtSecretKey, 'HS256'));
+            $jwtService = JWTService::getInstance();
+            $decoded = $jwtService->verifyToken($token[0]);
             $this->container->set('user', $decoded);
         } catch (\Exception $e) {
             return $this->response->json(['error' => 'Token de autenticação inválido'])->withStatus(401);
