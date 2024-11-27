@@ -3,12 +3,12 @@
 namespace App\Listener;
 
 use App\Event\ExpenseCreated;
+use App\Interfaces\EmailServiceInterface;
 use Hyperf\Event\Contract\ListenerInterface;
-use App\Service\EmailService;
 
 class ExpenseCreatedListener implements ListenerInterface
 {
-    public function __construct(private EmailService $emailService)
+    public function __construct(private readonly EmailServiceInterface $emailService)
     {
     }
 

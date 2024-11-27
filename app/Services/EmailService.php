@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
+use App\Interfaces\EmailServiceInterface;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use function Hyperf\Support\env;
 
-class EmailService
+class EmailService implements EmailServiceInterface
 {
     private PHPMailer $mailer;
 
