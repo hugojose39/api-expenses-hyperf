@@ -71,7 +71,7 @@ $    GitHub CLI - gh repo clone hugojose39/api-expenses-hyperf.git
 
 Quando o projeto estiver em seu computador, acesse sua pasta e execute os comandos no seu terminal:
 
-1. Crie o arquivo .env de acordo com o .env.example, nele estará a configuração para envio de emails e banco de dados.
+1. Crie o arquivo .env de acordo com o .env.example, nele estará a configuração para envio de emails, banco de dados e autenticação.
 
 2. Execute o comando abaixo para iniciar a aplicação:
     ```bash
