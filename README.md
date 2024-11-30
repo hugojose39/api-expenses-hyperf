@@ -23,14 +23,22 @@ Baixe o código-fonte em um arquivo zip, ou, se você tiver o Git instalado, use
 * CardController.php
 * ExpensesController.php
 * UsersController.php
+* CardRepositoryInterface.php
+* EmailServiceInterface.php
+* ExpenseRepositoryInterface.php
 * LoginRepositoryInterface.php
+* UserRepositoryInterface.php
 * Card.php
 * Expense.php
 * User.php
 * ExpenseCreated.php
 * ExpenseCreatedListener.php
 * LoginRepository.php
+* CardRepository.php
+* ExpenseRepository.php
+* UserRepository.php
 * EmailService.php
+* JWTService.php
 * CardRequest.php
 * ExpenseRequest.php
 * LoginRequest.php
@@ -39,6 +47,13 @@ Baixe o código-fonte em um arquivo zip, ou, se você tiver o Git instalado, use
 * routes.php
 * migrations
 * test
+
+## Design Patterns usados.
+
+* **Repository** - Gerenciamento de Entidades, para centralizar o acesso ao banco.
+* **Observer** - Envio de E-mail após criar a despesa, para notificar o usuário quando uma despesa é criada.
+* **Singleton** - Gerenciamento de JWT, para garantir que apenas uma instância do gerenciador de JWT seja usada.
+* **Strategy** - Gerenciamento do fluxo de envio de emails.
 
 ## Começando
 
