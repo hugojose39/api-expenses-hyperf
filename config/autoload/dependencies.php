@@ -6,6 +6,8 @@ use App\Interfaces\CardRepositoryInterface;
 use App\Repositories\CardRepository;
 use App\Interfaces\ExpenseRepositoryInterface;
 use App\Repositories\ExpenseRepository;
+use App\Interfaces\EmailServiceInterface;
+use App\Services\EmailService;
 use App\Interfaces\LoginRepositoryInterface;
 use App\Repositories\LoginRepository;
 use App\Interfaces\UserRepositoryInterface;
@@ -24,4 +26,5 @@ return [
     ExpenseRepositoryInterface::class => ExpenseRepository::class,
     LoginRepositoryInterface::class => LoginRepository::class,
     UserRepositoryInterface::class => UserRepository::class,
+    EmailServiceInterface::class => EmailService::class,
 ];
