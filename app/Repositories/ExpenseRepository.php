@@ -25,9 +25,9 @@ class ExpenseRepository implements ExpenseRepositoryInterface
         return Expense::findOrFail($id);
     }
 
-    public function findByCardAndUser(int $cardId, int $userId): ?Expense
+    public function findByCardAndUser(int $userId): ?Expense
     {
-        return Expense::where('card_id', $cardId)
+        return Expense::query()
             ->whereHas('card', fn ($query) => $query->where('user_id', $userId))
             ->first();
     }

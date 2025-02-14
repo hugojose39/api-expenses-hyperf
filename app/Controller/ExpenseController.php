@@ -32,14 +32,13 @@ class ExpenseController extends AbstractController
     public function index(): PsrResponseInterface
     {
         $user = $this->getAuthenticatedUser();
-        $expenses = $this->expenseRepository->findByCardAndUser($user->id, $user->id);
+        $expenses = $this->expenseRepository->findByCardAndUser($user->id);
         return $this->response->json($expenses);
     }
 
     public function show(int $id): PsrResponseInterface
     {
-        $user = $this->getAuthenticatedUser();
-        $expense = $this->expenseRepository->findByCardAndUser($id, $user->id);
+        $expense = $this->expenseRepository->find($id);
 
         if (!$expense) {
             return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);
@@ -112,8 +111,7 @@ class ExpenseController extends AbstractController
 
     public function delete(int $id): PsrResponseInterface
     {
-        $user = $this->getAuthenticatedUser();
-        $expense = $this->expenseRepository->findByCardAndUser($id, $user->id);
+        $expense = $this->expenseRepository->find($id);
 
         if (!$expense) {
             return $this->response->json(['message' => 'Despesa não encontrada ou não pertence ao usuário'])->withStatus(403);

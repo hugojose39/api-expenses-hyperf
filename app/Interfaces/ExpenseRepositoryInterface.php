@@ -15,7 +15,7 @@ interface ExpenseRepositoryInterface
 
     public function findOrFail(int $id): Expense;
 
-    public function findByCardAndUser(int $cardId, int $userId): ?Expense;
+    public function findByCardAndUser(int $userId): ?Expense;
 
     public function create(array $data): Expense;
 
